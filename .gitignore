@@ -170,3 +170,4 @@ tests/data
 .ruff_cache
 .aider*
 /.idea/
+nohup.out
