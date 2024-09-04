@@ -9,8 +9,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /root/faster-whisper-server
 COPY requirements.txt .
-RUN --mount=from=ghcr.io/astral-sh/uv:latest,source=/uv,target=/bin/uv \
-    uv pip install --system --python 3.12 --no-cache -r requirements.txt
+RUN --mount=from=ncr.nioint.com/ghcr.io/astral-sh/uv:latest,source=/uv,target=/bin/uv \
+    uv pip install --system --python 3.12 --no-cache -r requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple && \
+    pip cache purge
 COPY ./faster_whisper_server ./faster_whisper_server
 ENV WHISPER__MODEL=Systran/faster-distil-whisper-large-v3
 ENV WHISPER__INFERENCE_DEVICE=auto

@@ -155,11 +155,11 @@ class WhisperConfig(BaseModel):
     Models created by authors of `faster-whisper` can be found at https://huggingface.co/Systran
     You can find other supported models at https://huggingface.co/models?p=2&sort=trending&search=ctranslate2 and https://huggingface.co/models?sort=trending&search=ct2
     """
-    inference_device: Device = Field(default=Device.AUTO)
+    inference_device: Device = Field(default=Device.CUDA)
     device_index: int | list[int] = 0
     compute_type: Quantization = Field(default=Quantization.DEFAULT)
     cpu_threads: int = 0
-    num_workers: int = 1
+    num_workers: int = 4
 
 
 class Config(BaseSettings):
@@ -175,7 +175,7 @@ class Config(BaseSettings):
     log_level: str = "debug"
     host: str = Field(alias="UVICORN_HOST", default="0.0.0.0")
     port: int = Field(alias="UVICORN_PORT", default=8000)
-    allow_origins: list[str] | None = None
+    allow_origins: list[str] | None = ["*"]
     """
     https://docs.pydantic.dev/latest/concepts/pydantic_settings/#parsing-environment-variable-values
     Usage:
@@ -183,7 +183,7 @@ class Config(BaseSettings):
         `export ALLOW_ORIGINS='["*"]'`
     """
 
-    enable_ui: bool = True
+    enable_ui: bool = False
     """
     Whether to enable the Gradio UI. You may want to disable this if you want to minimize the dependencies.
     """

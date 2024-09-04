@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from collections import OrderedDict
 from io import BytesIO
-import time
 from typing import TYPE_CHECKING, Annotated, Literal
 
+import huggingface_hub
 from fastapi import (
     FastAPI,
     Form,
@@ -22,7 +23,6 @@ from fastapi.responses import StreamingResponse
 from fastapi.websockets import WebSocketState
 from faster_whisper import WhisperModel
 from faster_whisper.vad import VadOptions, get_speech_timestamps
-import huggingface_hub
 from pydantic import AfterValidator
 
 from faster_whisper_server.asr import FasterWhisperASR
@@ -53,15 +53,15 @@ if TYPE_CHECKING:
 loaded_models: OrderedDict[str, WhisperModel] = OrderedDict()
 
 
-def load_model(model_name: str) -> WhisperModel:
+def load_model(model_name: str = config.whisper.model) -> WhisperModel:
     if model_name in loaded_models:
-        logger.debug(f"{model_name} model already loaded")
+        logger.info(f"{model_name} model already loaded")
         return loaded_models[model_name]
     if len(loaded_models) >= config.max_models:
         oldest_model_name = next(iter(loaded_models))
         logger.info(f"Max models ({config.max_models}) reached. Unloading the oldest model: {oldest_model_name}")
         del loaded_models[oldest_model_name]
-    logger.debug(f"Loading {model_name}...")
+    logger.info(f"Loading {model_name}...")
     start = time.perf_counter()
     # NOTE: will raise an exception if the model name isn't valid
     whisper = WhisperModel(
@@ -79,9 +79,9 @@ def load_model(model_name: str) -> WhisperModel:
     return whisper
 
 
-logger.debug(f"Config: {config}")
-
-app = FastAPI()
+logger.info(f"Config: {config}")
+_ = load_model()
+app = FastAPI(docs_url="/documentation")
 
 if config.allow_origins is not None:
     app.add_middleware(
